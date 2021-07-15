@@ -321,6 +321,7 @@ plugins:                          # plugin list (sorted by priority)
   - ext-plugin-post-req            # priority: -3000
 
 stream_plugins: # sorted by priority
+  - ip-restriction                 # priority: 3000
   - limit-conn                     # priority: 1003
   - mqtt-proxy                     # priority: 1000
   # <- recommend to use priority (0, 100) for your custom plugins

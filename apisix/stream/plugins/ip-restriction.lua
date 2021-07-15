@@ -17,7 +17,7 @@
 local ip_restriction = require("apisix.plugins.ip-restriction.init")
 
 
-ip_restriction.access = ip_restriction.restrict
+ip_restriction.preread = ip_restriction.restrict
 
 
 return ip_restriction
