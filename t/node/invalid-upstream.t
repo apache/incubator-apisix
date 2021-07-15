@@ -89,36 +89,7 @@ passed
 
 
 
-=== TEST 4: invalid upstream(wrong type)
---- config
-    location /t {
-        content_by_lua_block {
-            local t = require("lib.test_admin").test
-            local code, body = t('/apisix/admin/upstreams/1',
-                ngx.HTTP_PUT,
-                [[{
-                    "nodes": {
-                        "127.0.0.1:1980": 1
-                    },
-                    "type": "roundrobin_invalid"
-                }]]
-            )
-
-            if code >= 300 then
-                ngx.status = code
-            end
-            ngx.print(body)
-        }
-    }
---- request
-GET /t
---- error_code: 400
---- response_body
-{"error_msg":"invalid configuration: property \"type\" validation failed: matches none of the enum values"}
-
-
-
-=== TEST 5: set valid upstream(id: 1)
+=== TEST 4: set valid upstream(id: 1)
 --- config
     location /t {
         content_by_lua_block {
@@ -145,7 +116,7 @@ qr/"nodes":\{"127.0.0.1:1980":1\}/
 
 
 
-=== TEST 6: no error log
+=== TEST 5: no error log
 --- config
     location /t {
         content_by_lua_block {

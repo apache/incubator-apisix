@@ -47,7 +47,7 @@ function _M.compare_upstream_node(up_conf, new_t)
     for i = 1, #new_t do
         local new_node = new_t[i]
         local old_node = old_t[i]
-        for _, name in ipairs({"host", "port", "weight", "priority"}) do
+        for _, name in ipairs({"host", "port", "weight", "priority", "metadata"}) do
             if new_node[name] ~= old_node[name] then
                 return false
             end

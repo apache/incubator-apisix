@@ -568,6 +568,7 @@ In addition to the basic complex equalization algorithm selection, APISIX's Upst
 * `chash`: consistent hash
 * `ewma`: pick one of node which has minimum latency. See https://en.wikipedia.org/wiki/EWMA_chart for details.
 * `least_conn`: pick node which has the lowest `(active_conn + 1) / weight`. Note the `active connection` concept is the same with Nginx: it is a connection in used by a request.
+* user-defined balancer which can be loaed via `require("apisix.balancer.your_balancer")`.
 
 `hash_on` can be set to different types:
 

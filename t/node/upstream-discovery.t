@@ -331,3 +331,96 @@ qr/proxy request to \S+/
 --- grep_error_log_out
 proxy request to 127.0.0.1:1979
 proxy request to 0.0.0.0:1980
+
+
+
+=== TEST 7: create new server picker when metadata change
+--- apisix_yaml
+routes:
+  -
+    uris:
+        - /hello
+    upstream_id: 1
+--- config
+    location /t {
+        content_by_lua_block {
+            local discovery = require("apisix.discovery.init").discovery
+            discovery.mock = {
+                nodes = function()
+                    return {
+                        {host = "127.0.0.1", port = 1980, weight = 1, metadata = {a = 1}},
+                        {host = "0.0.0.0", port = 1980, weight = 1, metadata = {}},
+                    }
+                end
+            }
+            local http = require "resty.http"
+            local uri = "http://127.0.0.1:" .. ngx.var.server_port .. "/hello"
+            local httpc = http.new()
+            local res, err = httpc:request_uri(uri, {method = "GET", keepalive = false})
+            ngx.say(res.status)
+
+            discovery.mock = {
+                nodes = function()
+                    return {
+                        {host = "127.0.0.1", port = 1980, weight = 1, metadata = {a = 1}},
+                        {host = "0.0.0.0", port = 1980, weight = 1, metadata = {b = 1}},
+                    }
+                end
+            }
+            local uri = "http://127.0.0.1:" .. ngx.var.server_port .. "/hello"
+            local httpc = http.new()
+            local res, err = httpc:request_uri(uri, {method = "GET", keepalive = false})
+        }
+    }
+--- grep_error_log eval
+qr/create_obj_fun\(\): upstream nodes:/
+--- grep_error_log_out
+create_obj_fun(): upstream nodes:
+create_obj_fun(): upstream nodes:
+
+
+
+=== TEST 8: don't create new server picker when metadata doesn't change
+--- apisix_yaml
+routes:
+  -
+    uris:
+        - /hello
+    upstream_id: 1
+--- config
+    location /t {
+        content_by_lua_block {
+            local discovery = require("apisix.discovery.init").discovery
+            local meta1 = {a = 1}
+            local meta2 = {b = 2}
+            discovery.mock = {
+                nodes = function()
+                    return {
+                        {host = "127.0.0.1", port = 1980, weight = 1, metadata = meta1},
+                        {host = "0.0.0.0", port = 1980, weight = 1, metadata = meta2},
+                    }
+                end
+            }
+            local http = require "resty.http"
+            local uri = "http://127.0.0.1:" .. ngx.var.server_port .. "/hello"
+            local httpc = http.new()
+            local res, err = httpc:request_uri(uri, {method = "GET", keepalive = false})
+            ngx.say(res.status)
+
+            discovery.mock = {
+                nodes = function()
+                    return {
+                        {host = "127.0.0.1", port = 1980, weight = 1, metadata = meta1},
+                        {host = "0.0.0.0", port = 1980, weight = 1, metadata = meta2},
+                    }
+                end
+            }
+            local uri = "http://127.0.0.1:" .. ngx.var.server_port .. "/hello"
+            local httpc = http.new()
+            local res, err = httpc:request_uri(uri, {method = "GET", keepalive = false})
+        }
+    }
+--- grep_error_log eval
+qr/create_obj_fun\(\): upstream nodes:/
+--- grep_error_log_out
+create_obj_fun(): upstream nodes:

@@ -453,7 +453,7 @@ passed
 
 
 
-=== TEST 13: invalid type
+=== TEST 13: unknown type
 --- config
     location /t {
         content_by_lua_block {
@@ -465,7 +465,7 @@ passed
                     "nodes": {
                         "127.0.0.1:8080": 1
                     },
-                    "type": "invalid_type"
+                    "type": "unknown"
                 }]]
                 )
 
@@ -475,9 +475,8 @@ passed
     }
 --- request
 GET /t
---- error_code: 400
---- response_body
-{"error_msg":"invalid configuration: property \"type\" validation failed: matches none of the enum values"}
+--- response_body chomp
+passed
 --- no_error_log
 [error]
 
