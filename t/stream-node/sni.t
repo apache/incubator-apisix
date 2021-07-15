@@ -128,7 +128,23 @@ proxy request to 127.0.0.1:1995
 
 
 
-=== TEST 3: hit route, wildcard SNI
+=== TEST 3: hit route (session reuse)
+--- stream_tls_request
+mmm
+--- stream_sni: a.test.com
+--- stream_session_reuse
+--- response_body
+hello world
+hello world
+--- grep_error_log eval
+qr/proxy request to 127.0.0.\d:1995/
+--- grep_error_log_out
+proxy request to 127.0.0.1:1995
+proxy request to 127.0.0.1:1995
+
+
+
+=== TEST 4: hit route, wildcard SNI
 --- stream_tls_request
 mmm
 --- stream_sni: b.test.com
@@ -139,7 +155,7 @@ proxy request to 127.0.0.2:1995
 
 
 
-=== TEST 4: hit route, no TLS
+=== TEST 5: hit route, no TLS
 --- stream_enable
 --- stream_request
 mmm
@@ -150,7 +166,7 @@ proxy request to 127.0.0.3:1995
 
 
 
-=== TEST 5: set different stream route with the same sni
+=== TEST 6: set different stream route with the same sni
 --- config
     location /t {
         content_by_lua_block {
@@ -204,7 +220,7 @@ passed
 
 
 
-=== TEST 6: hit route
+=== TEST 7: hit route
 --- stream_tls_request
 mmm
 --- stream_sni: a.test.com
@@ -215,7 +231,7 @@ proxy request to 127.0.0.4:1995
 
 
 
-=== TEST 7: change a.test.com route to fall back to wildcard route
+=== TEST 8: change a.test.com route to fall back to wildcard route
 --- config
     location /t {
         content_by_lua_block {
@@ -250,7 +266,7 @@ passed
 
 
 
-=== TEST 8: hit route
+=== TEST 9: hit route
 --- stream_tls_request
 mmm
 --- stream_sni: a.test.com
@@ -261,7 +277,7 @@ proxy request to 127.0.0.2:1995
 
 
 
-=== TEST 9: no sni matched, fall back to non-sni route
+=== TEST 10: no sni matched, fall back to non-sni route
 --- config
     location /t {
         content_by_lua_block {
@@ -285,7 +301,7 @@ passed
 
 
 
-=== TEST 10: hit route
+=== TEST 11: hit route
 --- stream_tls_request
 mmm
 --- stream_sni: b.test.com
@@ -296,7 +312,7 @@ proxy request to 127.0.0.3:1995
 
 
 
-=== TEST 11: clean up routes
+=== TEST 12: clean up routes
 --- config
     location /t {
         content_by_lua_block {

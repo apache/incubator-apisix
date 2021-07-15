@@ -258,34 +258,43 @@ _EOC_
         }
         chomp $stream_tls_request;
 
+        my $repeat = "1";
+        if (defined $block->stream_session_reuse) {
+            $repeat = "2";
+        }
+
         my $config = <<_EOC_;
             location /stream_tls_request {
                 content_by_lua_block {
-                    local sock = ngx.socket.tcp()
-                    local ok, err = sock:connect("127.0.0.1", 2005)
-                    if not ok then
-                        ngx.say("failed to connect: ", err)
-                        return
-                    end
+                    local sess
+                    for _ = 1, $repeat do
+                        local sock = ngx.socket.tcp()
+                        local ok, err = sock:connect("127.0.0.1", 2005)
+                        if not ok then
+                            ngx.say("failed to connect: ", err)
+                            return
+                        end
 
-                    local sess, err = sock:sslhandshake(nil, $sni, false)
-                    if not sess then
-                        ngx.say("failed to do SSL handshake: ", err)
-                        return
-                    end
+                        sess, err = sock:sslhandshake(sess, $sni, false)
+                        if not sess then
+                            ngx.say("failed to do SSL handshake: ", err)
+                            return
+                        end
 
-                    local bytes, err = sock:send("$stream_tls_request")
-                    if not bytes then
-                        ngx.say("send stream request error: ", err)
-                        return
-                    end
-                    local data, err = sock:receive("*a")
-                    if not data then
+                        local bytes, err = sock:send("$stream_tls_request")
+                        if not bytes then
+                            ngx.say("send stream request error: ", err)
+                            return
+                        end
+                        local data, err = sock:receive("*a")
+                        if not data then
+                            sock:close()
+                            ngx.say("receive stream response error: ", err)
+                            return
+                        end
+                        ngx.print(data)
                         sock:close()
-                        ngx.say("receive stream response error: ", err)
-                        return
                     end
-                    ngx.print(data)
                 }
             }
 _EOC_

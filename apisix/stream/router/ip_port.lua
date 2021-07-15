@@ -19,7 +19,6 @@ local config_util = require("apisix.core.config_util")
 local plugin_checker = require("apisix.plugin").stream_plugin_checker
 local router_new = require("apisix.utils.router").new
 local ngx_ssl = require("ngx.ssl")
-local ngx_lua_version = ngx.config.ngx_lua_version -- get the version of stream-lua-nginx-module
 local error     = error
 local tonumber  = tonumber
 local ipairs = ipairs
@@ -135,17 +134,9 @@ do
             router_ver = user_routes.conf_version
         end
 
-        if ngx_lua_version < 9 then
-            -- be compatible with old OpenResty
-            local sni = ngx_ssl.server_name()
-            if sni then
-                local sni_rev = sni:reverse()
-                api_ctx.sni_rev = sni_rev
-            end
-        end
-
-        if api_ctx.sni_rev and tls_router then
-            local sni_rev = api_ctx.sni_rev
+        local sni = ngx_ssl.server_name()
+        if sni and tls_router then
+            local sni_rev = sni:reverse()
 
             core.table.clear(match_opts)
             match_opts.vars = api_ctx.var
