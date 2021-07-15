@@ -331,3 +331,35 @@ qr/proxy request to \S+/
 --- grep_error_log_out
 proxy request to 127.0.0.1:1979
 proxy request to 0.0.0.0:1980
+
+
+
+=== TEST 7: bad nodes return by the discovery
+--- apisix_yaml
+routes:
+  -
+    uris:
+        - /hello
+    upstream_id: 1
+--- config
+    location /t {
+        content_by_lua_block {
+            local discovery = require("apisix.discovery.init").discovery
+            discovery.mock = {
+                nodes = function()
+                    return {
+                        {host = "127.0.0.1", port = 1980, weight = "0"},
+                    }
+                end
+            }
+            local http = require "resty.http"
+            local uri = "http://127.0.0.1:" .. ngx.var.server_port .. "/hello"
+            local httpc = http.new()
+            local res, err = httpc:request_uri(uri, {method = "GET", keepalive = false})
+            ngx.say(res.status)
+        }
+    }
+--- response_body
+503
+--- error_log
+invalid nodes format:

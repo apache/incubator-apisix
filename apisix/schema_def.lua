@@ -331,6 +331,37 @@ local nodes_schema = {
         }
     }
 }
+_M.discovery_nodes = {
+    type = "array",
+    items = {
+        type = "object",
+        properties = {
+            host = {
+                description = "host or ip",
+            },
+            port = {
+                description = "port of node",
+                type = "integer",
+                minimum = 1,
+            },
+            weight = {
+                description = "weight of node",
+                type = "integer",
+                minimum = 0,
+            },
+            priority = {
+                description = "priority of node",
+                type = "integer",
+            },
+            metadata = {
+                description = "metadata of node",
+                type = "object",
+            }
+        },
+        -- nodes from DNS discovery may not contain port
+        required = {"host", "weight"},
+    },
+}
 
 
 local certificate_scheme = {

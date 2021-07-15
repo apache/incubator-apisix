@@ -235,7 +235,8 @@ function _M.set_by_route(route, api_ctx)
 
         local dis = discovery[up_conf.discovery_type]
         if not dis then
-            return 500, "discovery " .. up_conf.discovery_type .. " is uninitialized"
+            local err = "discovery " .. up_conf.discovery_type .. " is uninitialized"
+            return 500, err
         end
 
         local new_nodes, err = dis.nodes(up_conf.service_name)
@@ -245,6 +246,11 @@ function _M.set_by_route(route, api_ctx)
 
         local same = upstream_util.compare_upstream_node(up_conf, new_nodes)
         if not same then
+            local pass, err = core.schema.check(core.schema.discovery_nodes, new_nodes)
+            if not pass then
+                return HTTP_CODE_UPSTREAM_UNAVAILABLE, "invalid nodes format: " .. err
+            end
+
             up_conf.nodes = new_nodes
             local new_up_conf = core.table.clone(up_conf)
             core.log.info("discover new upstream from ", up_conf.service_name, ", type ",
