@@ -148,6 +148,7 @@ nginx_config:                     # config for render the template to generate n
 
   stream:
     lua_shared_dict:
+      etcd-cluster-health-check-stream: 10m
       lrucache-lock-stream: 10m
       plugin-limit-conn-stream: 10m
 
