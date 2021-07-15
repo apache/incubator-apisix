@@ -25,6 +25,7 @@ local schema = {
         conn = {type = "integer", exclusiveMinimum = 0},
         burst = {type = "integer",  minimum = 0},
         default_conn_delay = {type = "number", exclusiveMinimum = 0},
+        delay_strict_mode = {type = "boolean", default = false},
         key = {type = "string",
             enum = {"remote_addr", "server_addr", "http_x_real_ip",
                     "http_x_forwarded_for", "consumer_name"},
