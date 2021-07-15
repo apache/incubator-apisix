@@ -16,7 +16,7 @@
 --
 local require = require
 local core = require("apisix.core")
-local _, apisix_ngx_client = pcall(require, "resty.apisix.client")
+local ok, apisix_ngx_client = pcall(require, "resty.apisix.client")
 local tonumber = tonumber
 
 
@@ -48,7 +48,7 @@ end
 
 
 function _M.rewrite(conf, ctx)
-    if not apisix_ngx_client then
+    if not ok then
         core.log.error("need to build APISIX-OpenResty to support client restriction")
         return 503
     end
